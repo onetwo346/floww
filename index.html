@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floww - Buy & Sell Crypto Instantly</title>
+    <link rel="stylesheet" href="main.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+    <script>
+        let web3;
+        let selectedProcessor = null;
+        let cryptoRates = {};
+
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // Show connecting status
+                    document.getElementById('walletBtn').textContent = 'Connecting...';
+                    document.getElementById('walletStatus').textContent = 'Connecting...';
+                    
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    web3 = new Web3(window.ethereum);
+                    const accounts = await web3.eth.getAccounts();
+                    
+                    // Update UI
+                    const walletAddress = accounts[0];
+                    document.getElementById('walletStatus').textContent = 
+                        walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4);
+                    document.getElementById('walletDot').classList.add('connected');
+                    document.getElementById('walletBtn').textContent = 'Wallet Connected';
+                    document.getElementById('walletBtn').classList.add('connected');
+                    
+                    // Store wallet in localStorage for persistence
+                    const user = localStorage.getItem('user');
+                    if (user) {
+                        try {
+                            const userData = JSON.parse(user);
+                            userData.walletAddress = walletAddress;
+                            localStorage.setItem('user', JSON.stringify(userData));
+                        } catch (e) {
+                            console.error('Error updating user data with wallet');
+                        }
+                    }
+                    
+                    // Show success message
+                    alert('Wallet connected successfully!');
+                    
+                } catch (error) {
+                    console.error('Error connecting wallet:', error);
+                    document.getElementById('walletBtn').textContent = 'Connect Wallet';
+                    document.getElementById('walletStatus').textContent = 'Connection failed';
+                    alert('Failed to connect wallet: ' + (error.message || 'Unknown error'));
+                }
+            } else {
+                alert('Please install MetaMask to connect your wallet!');
+                window.open('https://metamask.io/download/', '_blank');
+            }
+        }
+
+        function selectProcessor(processor) {
+            selectedProcessor = processor;
+            document.querySelectorAll('.processor-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.querySelector(`.processor-option[onclick*="${processor}"]`).classList.add('selected');
+            updateRate();
+        }
+
+        async function fetchCryptoRates() {
+            try {
+                // First try our local API endpoint
+                try {
+                    const response = await fetch('/api/rates');
+                    const data = await response.json();
+                    cryptoRates = {
+                        'BTC': { usd: data.BTC, eur: data.BTC * 0.92, gbp: data.BTC * 0.79, ngn: data.BTC * 1500 },
+                        'ETH': { usd: data.ETH, eur: data.ETH * 0.92, gbp: data.ETH * 0.79, ngn: data.ETH * 1500 },
+                        'SOL': { usd: data.SOL, eur: data.SOL * 0.92, gbp: data.SOL * 0.79, ngn: data.SOL * 1500 },
+                        'DOGE': { usd: data.DOGE, eur: data.DOGE * 0.92, gbp: data.DOGE * 0.79, ngn: data.DOGE * 1500 }
+                    };
+                    console.log('Rates loaded from local API:', cryptoRates);
+                } catch (localError) {
+                    console.log('Local API failed, falling back to CoinGecko API');
+                    // Fallback to CoinGecko if our API fails
+                    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,dogecoin&vs_currencies=usd,eur,gbp');
+                    const data = await response.json();
+                    cryptoRates = {
+                        'BTC': data.bitcoin,
+                        'ETH': data.ethereum,
+                        'SOL': data.solana,
+                        'DOGE': data.dogecoin
+                    };
+                    // Add NGN rates (approximation)
+                    Object.keys(cryptoRates).forEach(coin => {
+                        if (cryptoRates[coin].usd) {
+                            cryptoRates[coin].ngn = cryptoRates[coin].usd * 1500; // Approximate NGN rate
+                        }
+                    });
+                    console.log('Rates loaded from CoinGecko:', cryptoRates);
+                }
+                updateRate();
+            } catch (error) {
+                console.error('Error fetching rates:', error);
+                // Set fallback rates if all APIs fail
+                cryptoRates = {
+                    'BTC': { usd: 69420.50, eur: 63866.86, gbp: 54842.20, ngn: 104130750 },
+                    'ETH': { usd: 3876.25, eur: 3566.15, gbp: 3062.24, ngn: 5814375 },
+                    'SOL': { usd: 142.33, eur: 130.94, gbp: 112.44, ngn: 213495 },
+                    'DOGE': { usd: 0.12, eur: 0.11, gbp: 0.09, ngn: 180 }
+                };
+                updateRate();
+            }
+        }
+
+        function updateRate() {
+            const payAmount = parseFloat(document.getElementById('payAmount').value) || 0;
+            const payCurrency = document.getElementById('payCurrency').value.toLowerCase();
+            const receiveCurrency = document.getElementById('receiveCurrency').value;
+            
+            if (cryptoRates[receiveCurrency] && cryptoRates[receiveCurrency][payCurrency]) {
+                const rate = cryptoRates[receiveCurrency][payCurrency];
+                let receiveAmount;
+                
+                if (tradeMode === 'buy') {
+                    receiveAmount = payAmount / rate;
+                } else { // sell mode
+                    receiveAmount = payAmount * rate;
+                }
+                
+                document.getElementById('receiveAmount').value = receiveAmount.toFixed(8);
+                document.getElementById('currentRate').textContent = 
+                    `1 ${receiveCurrency} = ${rate.toLocaleString()} ${payCurrency.toUpperCase()}`;
+            } else {
+                console.error('Missing rate data for', receiveCurrency, payCurrency);
+                document.getElementById('currentRate').textContent = 
+                    `Rate unavailable for ${receiveCurrency}/${payCurrency.toUpperCase()}`;
+            }
+        }
+
+        // Check if user is logged in
+        function checkUserAuth() {
+            const token = localStorage.getItem('token');
+            const userDataStr = localStorage.getItem('user');
+            
+            if (token && userDataStr) {
+                try {
+                    const userData = JSON.parse(userDataStr);
+                    document.getElementById('loginBtn').style.display = 'none';
+                    document.getElementById('signupBtn').style.display = 'none';
+                    
+                    // Create and show logout button
+                    const logoutBtn = document.createElement('li');
+                    logoutBtn.innerHTML = `<a href="#" class="btn-secondary">Logout</a>`;
+                    logoutBtn.addEventListener('click', () => {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.reload();
+                    });
+                    
+                    const navLinks = document.querySelector('.nav-links');
+                    navLinks.appendChild(logoutBtn);
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                }
+            }
+        }
+        
+        // Trade mode (buy/sell)
+        let tradeMode = 'buy';
+        
+        function setTradeMode(mode) {
+            document.querySelectorAll('.trade-tabs .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase() === mode) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update form labels based on mode
+            if (mode === 'buy') {
+                document.querySelector('.trade-form label:first-child').textContent = 'You Pay';
+                document.querySelector('.trade-form label:last-of-type').textContent = 'You Receive';
+            } else {
+                document.querySelector('.trade-form label:first-child').textContent = 'You Sell';
+                document.querySelector('.trade-form label:last-of-type').textContent = 'You Receive';
+            }
+            updateRate();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize trade functionality
+            selectProcessor('wert');
+            fetchCryptoRates();
+            setInterval(fetchCryptoRates, 60000); // Update rates every minute
+            
+            // Add click handler for buy/sell tabs
+            document.querySelectorAll('.trade-tabs .tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => setTradeMode(btn.textContent.toLowerCase()));
+            });
+            
+            // Add click handler for wallet button if not already connected
+            document.getElementById('walletBtn').addEventListener('click', connectWallet);
+            
+            // Initialize auth state
+            checkUserAuth();
+
+            // Section Navigation
+            function showSection(sectionId) {
+                // Hide all sections
+                document.querySelectorAll('.section').forEach(section => {
+                    section.style.display = 'none';
+                    section.style.opacity = '0';
+                });
+                document.querySelector('.hero').style.display = 'none';
+                document.querySelector('.hero').style.opacity = '0';
+                document.querySelector('.features').style.display = 'none';
+                document.querySelector('.features').style.opacity = '0';
+
+                // Show the target section
+                if (sectionId === 'trade') {
+                    document.querySelector('.hero').style.display = 'block';
+                    document.querySelector('.hero').style.opacity = '1';
+                    document.querySelector('.features').style.display = 'block';
+                    document.querySelector('.features').style.opacity = '1';
+                    document.querySelector('main').style.background = 'linear-gradient(to bottom, #1a1a2e, #000)';
+                } else {
+                    const targetSection = document.getElementById(sectionId);
+                    if (targetSection) {
+                        targetSection.style.display = 'block';
+                        targetSection.style.opacity = '1';
+                        document.querySelector('main').style.background = 'linear-gradient(to bottom, #1a1a2e, #16213e)';
+                    }
+                }
+
+                // Update active nav link
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('data-section') === sectionId) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            // Handle navigation clicks
+            document.querySelectorAll('[data-section]').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = e.target.getAttribute('data-section');
+                    showSection(section);
+                    window.history.pushState({section}, '', `#${section}`);
+                });
+            });
+
+            // Handle browser back/forward
+            window.addEventListener('popstate', (e) => {
+                const section = window.location.hash.slice(1) || 'trade';
+                showSection(section);
+            });
+
+            // Handle form submissions
+            document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify({ email: data.email }));
+                        window.location.hash = '#trade';
+                        checkUserAuth();
+                    } else {
+                        alert(data.message || 'Login failed');
+                    }
+                } catch (error) {
+                    alert('Login failed: ' + error.message);
+                }
+            });
+
+            document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/signup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify({ email: data.email }));
+                        window.location.hash = '#trade';
+                        checkUserAuth();
+                    } else {
+                        alert(data.message || 'Signup failed');
+                    }
+                } catch (error) {
+                    alert('Signup failed: ' + error.message);
+                }
+            });
+
+            // Show initial section based on hash or default to trade
+            const initialSection = window.location.hash.slice(1) || 'trade';
+            showSection(initialSection);
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">Floww</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#trade" class="nav-link active" data-section="trade">Buy/Sell</a></li>
+                    <li><a href="#business" class="nav-link" data-section="business">Business</a></li>
+                    <li><a href="#about" class="nav-link" data-section="about">About</a></li>
+                    <li><a href="#login" id="loginBtn" class="btn-secondary" data-section="login">Sign In</a></li>
+                    <li><a href="#signup" id="signupBtn" class="btn-primary" data-section="signup">Sign Up</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" id="trade">
+            <div class="container">
+                <h1>Buy & Sell Crypto Instantly with <span style="color: #3b82f6;">Floww</span></h1>
+                <p>Broker Your Way - Simple, Secure, Fast Transactions</p>
+                <div class="trade-box">
+                    <div class="trade-header">
+                        <div class="trade-tabs">
+                            <button class="tab-btn active" onclick="setTradeMode('buy')">Buy</button>
+                            <button class="tab-btn" onclick="setTradeMode('sell')">Sell</button>
+                        </div>
+                        <div class="wallet-status">
+                            <div class="status-dot" id="walletDot"></div>
+                            <span id="walletStatus">Wallet not connected</span>
+                        </div>
+                    </div>
+                    <div class="trade-form">
+                        <div class="form-group">
+                            <label>You Pay</label>
+                            <input type="text" placeholder="0.00" id="payAmount" onInput="updateRate()">
+                            <select id="payCurrency" onChange="updateRate()">
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="NGN">NGN</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>You Receive</label>
+                            <input type="text" placeholder="0.00" id="receiveAmount" readonly>
+                            <select id="receiveCurrency" onChange="updateRate()">
+                                <option value="BTC">BTC</option>
+                                <option value="ETH">ETH</option>
+                                <option value="SOL">SOL</option>
+                                <option value="DOGE">DOGE</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="rate-display">
+                        <div>Current Rate</div>
+                        <div class="rate" id="currentRate">1 BTC = $0.00</div>
+                    </div>
+                    <div class="processor-select">
+                        <div class="processor-option" onclick="selectProcessor('wert')">
+                            <div>Wert</div>
+                            <div class="fee">No KYC up to $5,000</div>
+                        </div>
+                        <div class="processor-option" onclick="selectProcessor('paynow')">
+                            <div>PayNow</div>
+                            <div class="fee">0.5% with KYC</div>
+                        </div>
+                        <div class="processor-option" onclick="selectProcessor('bitpay')">
+                            <div>BitPay</div>
+                            <div class="fee">KYC over $3,000</div>
+                        </div>
+                    </div>
+                    <button class="btn" style="width: 100%; margin-top: 1.5rem; padding: 0.75rem;" id="walletBtn" onclick="connectWallet()">
+                        Connect Wallet
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <h2>Why Choose Floww</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Non-Custodial</h3>
+                        <p>Connect your own wallet. We never hold your assets.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Smart Routing</h3>
+                        <p>Best rates through intelligent processor routing.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🛡️</div>
+                        <h3>Secure & Fast</h3>
+                        <p>Industry-leading security with quick transactions.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="business" class="section" style="display: none; opacity: 0;">
+            <div class="container">
+                <div class="section-header">
+                    <h1>Business Solutions</h1>
+                    <p>Empower your business with our comprehensive crypto brokerage solutions.</p>
+                </div>
+                <div class="business-grid">
+                    <div class="business-card">
+                        <div class="icon">💼</div>
+                        <h3>Enterprise API</h3>
+                        <p>Integrate our powerful crypto trading capabilities directly into your platform with our enterprise-grade API.</p>
+                        <button class="btn-primary" onclick="window.location.hash='#signup'">Get Started</button>
+                    </div>
+                    <div class="business-card">
+                        <div class="icon">🔄</div>
+                        <h3>Liquidity Solutions</h3>
+                        <p>Access deep liquidity pools across multiple exchanges with smart order routing for best execution.</p>
+                        <button class="btn-primary" onclick="window.location.hash='#signup'">Learn More</button>
+                    </div>
+                    <div class="business-card">
+                        <div class="icon">🛡️</div>
+                        <h3>Custody Services</h3>
+                        <p>Institutional-grade custody solutions with multi-signature security and insurance coverage.</p>
+                        <button class="btn-primary" onclick="window.location.hash='#signup'">Contact Sales</button>
+                    </div>
+                    <div class="business-card">
+                        <div class="icon">📊</div>
+                        <h3>Analytics Dashboard</h3>
+                        <p>Comprehensive reporting and analytics tools to track performance and optimize your trading strategy.</p>
+                        <button class="btn-primary" onclick="window.location.hash='#signup'">View Demo</button>
+                    </div>
+                    <div class="business-card">
+                        <div class="icon">🌐</div>
+                        <h3>Global Payments</h3>
+                        <p>Seamless cross-border payments with competitive rates and minimal fees using blockchain technology.</p>
+                        <button class="btn-primary" onclick="window.location.hash='#signup'">Explore</button>
+                    </div>
+                    <div class="business-card">
+                        <div class="icon">🔐</div>
+                        <h3>Compliance Solutions</h3>
+                        <p>Stay compliant with our built-in KYC/AML tools and regulatory reporting capabilities.</p>
+                        <button class="btn-primary" onclick="window.location.hash='#signup'">Learn More</button>
+                    </div>
+                </div>
+                <div class="cta-section">
+                    <h2>Ready to transform your business?</h2>
+                    <p>Join hundreds of businesses already using Floww's enterprise solutions.</p>
+                    <div class="cta-buttons">
+                        <button class="btn-large btn-primary" onclick="window.location.hash='#signup'">Create Business Account</button>
+                        <button class="btn-large btn-outline">Schedule a Demo</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="section" style="display: none; opacity: 0;">
+            <div class="container">
+                <div class="section-header">
+                    <h1>About Floww</h1>
+                    <p>Pioneering the future of crypto brokerage with security, simplicity, and innovation.</p>
+                </div>
+                <div class="about-content">
+                    <div class="about-grid">
+                        <div class="about-card">
+                            <h3>Our Story</h3>
+                            <p>Founded in 2023, Floww was born from a simple vision: to make cryptocurrency accessible to everyone, regardless of technical expertise or investment size.</p>
+                            <p>What began as a small team of blockchain enthusiasts has grown into a global platform serving users across 150+ countries, processing over $1 billion in monthly transaction volume.</p>
+                        </div>
+                        <div class="about-card">
+                            <h3>Our Mission</h3>
+                            <p>To make cryptocurrency accessible to everyone through a secure, transparent, and user-friendly platform that bridges traditional finance and the crypto economy.</p>
+                        </div>
+                        <div class="about-card">
+                            <h3>Our Vision</h3>
+                            <p>We aim to be the world's leading crypto brokerage by continuously innovating and providing cutting-edge solutions for individuals and businesses in the digital asset space.</p>
+                        </div>
+                        <div class="about-card">
+                            <h3>Our Values</h3>
+                            <p>We prioritize security, transparency, and global access. Our commitment to innovation drives us to develop new solutions for complex problems in the crypto world.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="team-section">
+                    <h2>Meet Our Leadership Team</h2>
+                    <div class="team-grid">
+                        <div class="team-card">
+                            <div class="team-photo photo1"></div>
+                            <h3>Alex Chen</h3>
+                            <div class="role">CEO & Co-Founder</div>
+                            <p>Former fintech executive with 15+ years of experience in building financial platforms.</p>
+                        </div>
+                        <div class="team-card">
+                            <div class="team-photo photo2"></div>
+                            <h3>Sophia Rodriguez</h3>
+                            <div class="role">CTO & Co-Founder</div>
+                            <p>Blockchain developer and security expert with background in cryptography.</p>
+                        </div>
+                        <div class="team-card">
+                            <div class="team-photo photo3"></div>
+                            <h3>Marcus Johnson</h3>
+                            <div class="role">Chief Financial Officer</div>
+                            <p>Former investment banker with expertise in regulatory compliance.</p>
+                        </div>
+                        <div class="team-card">
+                            <div class="team-photo photo4"></div>
+                            <h3>Leila Patel</h3>
+                            <div class="role">Head of Product</div>
+                            <p>Product leader focusing on user experience and design.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="login" class="section" style="display: none; opacity: 0;">
+            <div class="container">
+                <div class="auth-container">
+                    <div class="auth-content">
+                        <h2>Welcome Back</h2>
+                        <p class="auth-subtitle">Access your account to trade crypto, manage your wallet, and more.</p>
+                        <div class="auth-benefits">
+                            <div class="benefit-item">
+                                <div class="benefit-icon">🔒</div>
+                                <div class="benefit-text">Secure 2FA Authentication</div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">⚡</div>
+                                <div class="benefit-text">Instant Trading</div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">📊</div>
+                                <div class="benefit-text">Real-time Portfolio Tracking</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="auth-form-container">
+                        <form id="loginForm">
+                            <div class="form-group">
+                                <input type="email" id="loginEmail" placeholder="Email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" id="loginPassword" placeholder="Password" required>
+                            </div>
+                            <div class="form-options">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="rememberMe">
+                                    <span class="checkmark"></span>
+                                    Remember me
+                                </label>
+                                <a href="#" class="forgot-password">Forgot password?</a>
+                            </div>
+                            <button type="submit" class="btn">Sign In</button>
+                        </form>
+                        <p class="auth-switch">Don't have an account? <a href="#signup" data-section="signup">Sign Up</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="signup" class="section" style="display: none; opacity: 0;">
+            <div class="container">
+                <div class="auth-container">
+                    <div class="auth-content">
+                        <h2>Create Account</h2>
+                        <p class="auth-subtitle">Join Floww to start your crypto journey with security and simplicity.</p>
+                        <div class="auth-benefits">
+                            <div class="benefit-item">
+                                <div class="benefit-icon">🚀</div>
+                                <div class="benefit-text">Fast Account Setup</div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">💳</div>
+                                <div class="benefit-text">Multiple Payment Methods</div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon">🌐</div>
+                                <div class="benefit-text">Global Access & Support</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="auth-form-container">
+                        <form id="signupForm">
+                            <div class="form-group">
+                                <input type="email" id="signupEmail" placeholder="Email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" id="signupPassword" placeholder="Password" required>
+                                <div class="password-strength"></div>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                            </div>
+                            <div class="form-options">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="termsAgree" required>
+                                    <span class="checkmark"></span>
+                                    I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a>
+                                </label>
+                            </div>
+                            <button type="submit" class="btn">Create Account</button>
+                        </form>
+                        <p class="auth-switch">Already have an account? <a href="#login" data-section="login">Sign In</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Floww. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

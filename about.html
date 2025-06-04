@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Floww - Crypto Brokerage Platform</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        /* Cosmic theme with glassmorphism */
+        body {
+            background: linear-gradient(to bottom, #1a1a2e, #000);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .about-header {
+            padding: 6rem 0 4rem;
+            text-align: center;
+            background: rgba(26, 26, 46, 0.8);
+        }
+        
+        .about-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .about-header p {
+            max-width: 600px;
+            margin: 0 auto;
+            color: #9ca3af;
+        }
+        
+        .about-section {
+            padding: 4rem 0;
+        }
+        
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+        
+        .about-image {
+            position: relative;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            aspect-ratio: 16/9;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+        }
+        
+        .about-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1639762681057-408e52192e55?auto=format&fit=crop&q=80&w=1000') center/cover;
+            opacity: 0.6;
+            mix-blend-mode: overlay;
+        }
+        
+        .about-content h2 {
+            color: #3b82f6;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+        
+        .about-content p {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            color: #e5e7eb;
+        }
+        
+        .mission-section {
+            background: rgba(30, 30, 60, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 3rem;
+            margin: 4rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .mission-section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #3b82f6;
+        }
+        
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        
+        .value-card {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(20, 20, 40, 0.5);
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .value-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #3b82f6;
+        }
+        
+        .value-card h3 {
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+        }
+        
+        .team-section {
+            padding: 4rem 0;
+        }
+        
+        .team-section h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #3b82f6;
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        
+        .team-card {
+            background: rgba(30, 30, 60, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .team-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .team-photo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-position: center;
+            background-size: cover;
+            opacity: 0.8;
+        }
+        
+        .team-photo.photo1::before {
+            background-image: url('https://randomuser.me/api/portraits/men/32.jpg');
+        }
+        
+        .team-photo.photo2::before {
+            background-image: url('https://randomuser.me/api/portraits/women/44.jpg');
+        }
+        
+        .team-photo.photo3::before {
+            background-image: url('https://randomuser.me/api/portraits/men/22.jpg');
+        }
+        
+        .team-photo.photo4::before {
+            background-image: url('https://randomuser.me/api/portraits/women/68.jpg');
+        }
+        
+        .team-card h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+        
+        .team-card .role {
+            color: #3b82f6;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .team-card p {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .social-links a {
+            color: #e5e7eb;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            color: #3b82f6;
+            transform: translateY(-3px);
+        }
+        
+        @media (max-width: 768px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .about-image {
+                order: -1;
+                margin-bottom: 2rem;
+            }
+            
+            .mission-section {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">Floww</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/#trade" class="nav-link">Buy/Sell</a></li>
+                    <li><a href="/business.html" class="nav-link">Business</a></li>
+                    <li><a href="/about.html" class="nav-link active">About</a></li>
+                    <li><a href="/login.html" id="loginBtn" class="btn-secondary">Sign In</a></li>
+                    <li><a href="/signup.html" id="signupBtn" class="btn-primary">Sign Up</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="about-header">
+            <div class="container">
+                <h1>About Floww</h1>
+                <p>Pioneering the future of crypto brokerage with security, simplicity, and innovation</p>
+            </div>
+        </section>
+        
+        <section class="about-section">
+            <div class="container">
+                <div class="about-grid">
+                    <div class="about-content">
+                        <h2>Our Story</h2>
+                        <p>Founded in 2025, Floww was born from a simple vision: to make cryptocurrency accessible to everyone, regardless of technical expertise or investment size.</p>
+                        <p>What began as a small team of blockchain enthusiasts has grown into a global platform serving users across 150+ countries, processing over $1 billion in monthly transaction volume.</p>
+                        <p>Our platform bridges the gap between traditional finance and the crypto economy, providing a secure, transparent, and user-friendly environment for individuals and businesses to participate in the digital asset revolution.</p>
+                    </div>
+                    <div class="about-image"></div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="mission-section">
+            <div class="container">
+                <h2>Our Mission & Values</h2>
+                <div class="values-grid">
+                    <div class="value-card">
+                        <div class="icon">🔐</div>
+                        <h3>Security First</h3>
+                        <p>We prioritize the security of our users' assets and data above all else, implementing industry-leading protection measures.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="icon">🌐</div>
+                        <h3>Global Access</h3>
+                        <p>We believe in financial inclusion and work to provide access to crypto assets for everyone, everywhere.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="icon">💡</div>
+                        <h3>Innovation</h3>
+                        <p>We continuously push the boundaries of what's possible in crypto brokerage, developing new solutions to complex problems.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="icon">🤝</div>
+                        <h3>Transparency</h3>
+                        <p>We operate with complete transparency in our fees, processes, and communications with our users.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="team-section">
+            <div class="container">
+                <h2>Meet Our Leadership Team</h2>
+                <div class="team-grid">
+                    <div class="team-card">
+                        <div class="team-photo photo1"></div>
+                        <h3>Alex Chen</h3>
+                        <div class="role">CEO & Co-Founder</div>
+                        <p>Former fintech executive with 15+ years of experience in building financial platforms.</p>
+                        <div class="social-links">
+                            <a href="#" aria-label="LinkedIn">in</a>
+                            <a href="#" aria-label="Twitter">𝕏</a>
+                        </div>
+                    </div>
+                    <div class="team-card">
+                        <div class="team-photo photo2"></div>
+                        <h3>Sophia Rodriguez</h3>
+                        <div class="role">CTO & Co-Founder</div>
+                        <p>Blockchain developer and security expert with background in cryptography and distributed systems.</p>
+                        <div class="social-links">
+                            <a href="#" aria-label="LinkedIn">in</a>
+                            <a href="#" aria-label="Twitter">𝕏</a>
+                        </div>
+                    </div>
+                    <div class="team-card">
+                        <div class="team-photo photo3"></div>
+                        <h3>Marcus Johnson</h3>
+                        <div class="role">Chief Financial Officer</div>
+                        <p>Former investment banker with expertise in regulatory compliance and financial operations.</p>
+                        <div class="social-links">
+                            <a href="#" aria-label="LinkedIn">in</a>
+                            <a href="#" aria-label="Twitter">𝕏</a>
+                        </div>
+                    </div>
+                    <div class="team-card">
+                        <div class="team-photo photo4"></div>
+                        <h3>Leila Patel</h3>
+                        <div class="role">Head of Product</div>
+                        <p>Product leader with experience at major tech companies focusing on user experience and design.</p>
+                        <div class="social-links">
+                            <a href="#" aria-label="LinkedIn">in</a>
+                            <a href="#" aria-label="Twitter">𝕏</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 Floww. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (token && user) {
+                try {
+                    const userData = JSON.parse(user);
+                    document.getElementById('loginBtn').style.display = 'none';
+                    document.getElementById('signupBtn').style.display = 'none';
+                    
+                    // Create account button
+                    const accountBtn = document.createElement('li');
+                    const accountLink = document.createElement('a');
+                    accountLink.href = '/account';
+                    accountLink.className = 'nav-link';
+                    accountLink.innerHTML = `<span class="user-email">${userData.email}</span>`;
+                    accountBtn.appendChild(accountLink);
+                    
+                    // Create logout button
+                    const logoutBtn = document.createElement('li');
+                    const logoutLink = document.createElement('a');
+                    logoutLink.href = '#';
+                    logoutLink.className = 'btn-secondary';
+                    logoutLink.textContent = 'Log Out';
+                    logoutLink.onclick = function(e) {
+                        e.preventDefault();
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.reload();
+                    };
+                    logoutBtn.appendChild(logoutLink);
+                    
+                    const navLinks = document.querySelector('.nav-links');
+                    navLinks.appendChild(accountBtn);
+                    navLinks.appendChild(logoutBtn);
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

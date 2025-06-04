@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Floww</title>
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+    <div class="auth-container">
+        <form id="signupForm" class="auth-form">
+            <h2>Create Your Account</h2>
+            
+            <div class="form-tabs">
+                <button type="button" class="tab active" data-type="individual">Individual</button>
+                <button type="button" class="tab" data-type="business">Business</button>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+                <div class="password-strength"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+
+            <div id="businessFields" style="display: none;">
+                <div class="form-group">
+                    <label for="companyName">Company Name</label>
+                    <input type="text" id="companyName">
+                </div>
+                <div class="form-group">
+                    <label for="website">Website</label>
+                    <input type="url" id="website">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="terms" required>
+                    I agree to Floww's Terms of Service and Privacy Policy
+                </label>
+            </div>
+
+            <button type="submit" class="btn-primary">Create Account</button>
+            
+            <div class="auth-links">
+                Already have an account? <a href="login.html">Log In</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('signupForm');
+            const tabs = document.querySelectorAll('.tab');
+            const businessFields = document.getElementById('businessFields');
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    businessFields.style.display = 
+                        tab.dataset.type === 'business' ? 'block' : 'none';
+                });
+            });
+
+            // Form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    confirmPassword: document.getElementById('confirmPassword').value,
+                    type: document.querySelector('.tab.active').dataset.type,
+                    companyName: document.getElementById('companyName').value,
+                    website: document.getElementById('website').value,
+                    terms: document.getElementById('terms').checked
+                };
+
+                try {
+                    const response = await fetch('/api/auth/signup', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        // Store JWT token
+                        localStorage.setItem('token', data.token);
+                        // Redirect to 2FA setup
+                        window.location.href = '/auth/setup-2fa.html';
+                    } else {
+                        throw new Error(data.message || 'Signup failed');
+                    }
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Solutions - Floww</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        /* Cosmic theme with glassmorphism */
+        body {
+            background: linear-gradient(to bottom, #1a1a2e, #000);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .business-header {
+            padding: 6rem 0 4rem;
+            text-align: center;
+            background: rgba(26, 26, 46, 0.8);
+        }
+        
+        .business-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .business-header p {
+            max-width: 600px;
+            margin: 0 auto;
+            color: #9ca3af;
+        }
+        
+        .business-section {
+            padding: 4rem 0;
+        }
+        
+        .business-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .business-card {
+            background: rgba(30, 30, 60, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .business-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 48px rgba(59, 130, 246, 0.2);
+        }
+        
+        .business-card h3 {
+            color: #3b82f6;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .business-card p {
+            color: #e5e7eb;
+            margin-bottom: 1.5rem;
+        }
+        
+        .business-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #3b82f6;
+        }
+        
+        .cta-section {
+            background: rgba(30, 30, 60, 0.7);
+            padding: 4rem 0;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .cta-section h2 {
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .btn-large {
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-outline:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .business-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">Floww</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/#trade" class="nav-link">Buy/Sell</a></li>
+                    <li><a href="/business.html" class="nav-link active">Business</a></li>
+                    <li><a href="/about.html" class="nav-link">About</a></li>
+                    <li><a href="/login.html" id="loginBtn" class="btn-secondary">Sign In</a></li>
+                    <li><a href="/signup.html" id="signupBtn" class="btn-primary">Sign Up</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="business-header">
+            <div class="container">
+                <h1>Business Solutions</h1>
+                <p>Empower your business with our comprehensive crypto brokerage solutions</p>
+            </div>
+        </section>
+        
+        <section class="business-section">
+            <div class="container">
+                <div class="business-grid">
+                    <div class="business-card">
+                        <div class="icon">💼</div>
+                        <h3>Enterprise API</h3>
+                        <p>Integrate our powerful crypto trading capabilities directly into your platform with our enterprise-grade API.</p>
+                        <a href="/signup.html" class="btn-primary">Get Started</a>
+                    </div>
+                    
+                    <div class="business-card">
+                        <div class="icon">🔄</div>
+                        <h3>Liquidity Solutions</h3>
+                        <p>Access deep liquidity pools across multiple exchanges with smart order routing for best execution.</p>
+                        <a href="/signup.html" class="btn-primary">Learn More</a>
+                    </div>
+                    
+                    <div class="business-card">
+                        <div class="icon">🛡️</div>
+                        <h3>Custody Services</h3>
+                        <p>Institutional-grade custody solutions with multi-signature security and insurance coverage.</p>
+                        <a href="/signup.html" class="btn-primary">Contact Sales</a>
+                    </div>
+                    
+                    <div class="business-card">
+                        <div class="icon">📊</div>
+                        <h3>Analytics Dashboard</h3>
+                        <p>Comprehensive reporting and analytics tools to track performance and optimize your trading strategy.</p>
+                        <a href="/signup.html" class="btn-primary">View Demo</a>
+                    </div>
+                    
+                    <div class="business-card">
+                        <div class="icon">🌐</div>
+                        <h3>Global Payments</h3>
+                        <p>Seamless cross-border payments with competitive rates and minimal fees using blockchain technology.</p>
+                        <a href="/signup.html" class="btn-primary">Explore</a>
+                    </div>
+                    
+                    <div class="business-card">
+                        <div class="icon">🔐</div>
+                        <h3>Compliance Solutions</h3>
+                        <p>Stay compliant with our built-in KYC/AML tools and regulatory reporting capabilities.</p>
+                        <a href="/signup.html" class="btn-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="cta-section">
+            <div class="container">
+                <h2>Ready to transform your business?</h2>
+                <p>Join hundreds of businesses already using Floww's enterprise solutions</p>
+                
+                <div class="cta-buttons">
+                    <a href="/signup.html" class="btn-large btn-primary">Create Business Account</a>
+                    <a href="#" class="btn-large btn-outline">Schedule a Demo</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 Floww. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (token && user) {
+                try {
+                    const userData = JSON.parse(user);
+                    document.getElementById('loginBtn').style.display = 'none';
+                    document.getElementById('signupBtn').style.display = 'none';
+                    
+                    // Create account button
+                    const accountBtn = document.createElement('li');
+                    const accountLink = document.createElement('a');
+                    accountLink.href = '/account';
+                    accountLink.className = 'nav-link';
+                    accountLink.innerHTML = `<span class="user-email">${userData.email}</span>`;
+                    accountBtn.appendChild(accountLink);
+                    
+                    // Create logout button
+                    const logoutBtn = document.createElement('li');
+                    const logoutLink = document.createElement('a');
+                    logoutLink.href = '#';
+                    logoutLink.className = 'btn-secondary';
+                    logoutLink.textContent = 'Log Out';
+                    logoutLink.onclick = function(e) {
+                        e.preventDefault();
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.reload();
+                    };
+                    logoutBtn.appendChild(logoutLink);
+                    
+                    const navLinks = document.querySelector('.nav-links');
+                    navLinks.appendChild(accountBtn);
+                    navLinks.appendChild(logoutBtn);
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

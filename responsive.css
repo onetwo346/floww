@@ -1,0 +1,289 @@
+/* Responsive Styles for Floww Platform
+   Ensures compatibility across all devices and browsers */
+
+/* Base responsive adjustments */
+img, video, canvas, svg {
+    max-width: 100%;
+    height: auto;
+}
+
+input, button, textarea, select {
+    font: inherit;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Cross-browser compatibility */
+@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+    .glassmorphism {
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+    }
+}
+
+/* Fallback for browsers that don't support backdrop-filter */
+@supports not ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+    .glassmorphism {
+        background-color: rgba(20, 20, 40, 0.9);
+    }
+}
+
+/* Large Desktop (1440px and up) */
+@media (min-width: 1440px) {
+    html {
+        font-size: 18px;
+    }
+    
+    .container {
+        max-width: 1320px;
+    }
+    
+    .hero h1 {
+        font-size: 3.5rem;
+    }
+    
+    .trade-box {
+        max-width: 550px;
+    }
+}
+
+/* Desktop (1024px to 1439px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .container {
+        max-width: 960px;
+    }
+}
+
+/* Tablet Landscape (768px to 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    html {
+        font-size: 15px;
+    }
+    
+    .container {
+        max-width: 720px;
+    }
+    
+    header .nav-links {
+        gap: 1rem;
+    }
+    
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+    
+    .trade-box {
+        max-width: 90%;
+    }
+    
+    .auth-container {
+        flex-direction: column;
+        max-width: 90%;
+    }
+    
+    .auth-info, .auth-form-container {
+        width: 100%;
+    }
+    
+    .auth-info {
+        padding-bottom: 2rem;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .business-solutions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .team-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Tablet Portrait (481px to 767px) */
+@media (min-width: 481px) and (max-width: 767px) {
+    html {
+        font-size: 14px;
+    }
+    
+    .container {
+        max-width: 100%;
+        padding: 0 15px;
+    }
+    
+    header {
+        padding: 1rem 0;
+    }
+    
+    header .nav-links {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background: rgba(26, 26, 46, 0.95);
+        padding: 1rem 0;
+        z-index: 100;
+        transform: translateY(-150%);
+        transition: transform 0.3s ease;
+    }
+    
+    header .nav-links.active {
+        transform: translateY(0);
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+    }
+    
+    .hero p {
+        font-size: 1rem;
+    }
+    
+    .trade-box {
+        max-width: 100%;
+        margin: 1rem auto;
+    }
+    
+    .trade-tabs .tab-btn {
+        padding: 0.5rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .auth-container {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    
+    .auth-info, .auth-form-container {
+        width: 100%;
+    }
+    
+    .auth-info {
+        padding-bottom: 2rem;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .business-solutions, .team-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+/* Mobile (480px and down) */
+@media (max-width: 480px) {
+    html {
+        font-size: 13px;
+    }
+    
+    .container {
+        padding: 0 10px;
+    }
+    
+    header {
+        padding: 0.8rem 0;
+    }
+    
+    header .logo {
+        font-size: 1.5rem;
+    }
+    
+    .hero {
+        padding-top: 5rem;
+    }
+    
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+    
+    .hero p {
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+    }
+    
+    .trade-box {
+        padding: 1.5rem;
+        margin: 1rem auto;
+    }
+    
+    .trade-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .trade-tabs .tab-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .auth-container {
+        padding: 1.5rem;
+    }
+    
+    .benefit-items {
+        grid-template-columns: 1fr;
+    }
+    
+    .section {
+        padding: 3rem 0;
+    }
+    
+    .section h2 {
+        font-size: 1.8rem;
+    }
+    
+    footer {
+        padding: 1.5rem 0;
+        text-align: center;
+    }
+}
+
+/* Print styles */
+@media print {
+    body {
+        background: white;
+        color: black;
+    }
+    
+    .trade-box, .auth-container, .section {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    header, footer, .btn-primary, .btn-secondary {
+        display: none;
+    }
+}
+
+/* High contrast mode for accessibility */
+@media (prefers-contrast: high) {
+    body {
+        background: black;
+        color: white;
+    }
+    
+    .btn-primary, .tab-btn.active {
+        background: white;
+        color: black;
+        border: 2px solid white;
+    }
+    
+    input, select {
+        border: 2px solid white;
+    }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+    
+    html {
+        scroll-behavior: auto !important;
+    }
+}
